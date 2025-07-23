@@ -1,0 +1,22 @@
+#EXTM3U
+
+#EXTINF:-1 tvg-id="tvbrasil" group-title="Públicos",TV Brasil
+https://streaming.cdn.pbs-br.tv/tvbrasil/tracks-v1a1/mono.m3u8
+
+#EXTINF:-1 tvg-id="tvcamara" group-title="Públicos",TV Câmara
+https://stream3.camara.gov.br/tv1/manifest.m3u8
+
+#EXTINF:-1 tvg-id="redevida" group-title="Cristãos",Rede Vida
+https://redevidahls-lh.akamaihd.net/i/redevida_1@71525/master.m3u8
+
+#EXTINF:-1 tvg-id="cancaonova" group-title="Cristãos",Canção Nova
+https://play.cancaonova.com/tv/tvcn/master.m3u8
+
+#EXTINF:-1 tvg-id="tvaparecida" group-title="Cristãos",TV Aparecida
+https://aovivo.a12.com/tvaparecida/index.m3u8
+
+#EXTINF:-1 tvg-id="univesptv" group-title="Educacionais",Univesp TV
+https://univesptv-lh.akamaihd.net/i/univesptv_1@62676/master.m3u8
+
+#EXTINF:-1 tvg-id="tvescola" group-title="Educacionais",TV Escola
+https://evpp.mmcdn.com.br/tvescola/smil:tvescola.smil/playlist.m3u8
