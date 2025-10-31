@@ -1,5 +1,6 @@
 const M3U_URL = "http://americakg.xyz/get.php?username=djy7adcm&password=dbkauapt&type=m3u_plus&output=ts";
 
+// Splash Screen
 window.onload = () => {
     setTimeout(() => {
         document.getElementById("splash").classList.add("hidden");
@@ -7,6 +8,7 @@ window.onload = () => {
     }, 2000);
 };
 
+// Login funcional
 function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -28,13 +30,14 @@ function login() {
     }
 }
 
+// Mostrar seção e listar itens da playlist M3U
 async function showSection(section) {
     const res = await fetch(M3U_URL);
     const text = await res.text();
     const lines = text.split("\n").filter(l => l.trim() !== "");
     const items = [];
 
-    for(let i=0;i<lines.length;i++){
+    for(let i=0; i<lines.length; i++){
         if(lines[i].startsWith("#EXTINF:")) {
             const title = lines[i].split(",")[1] || "Sem título";
             const url = lines[i+1] || "";
@@ -56,16 +59,26 @@ async function showSection(section) {
     });
 }
 
+// Player embutido
 function play(url) {
     const player = document.getElementById("player");
     player.src = url;
     player.play();
 }
 
-function goToPlanos() { window.location.href = "planos.html"; }
-function comprar(plano){ alert(`Plano ${plano} selecionado!`); }
+// Redirecionar para tela de planos
+function goToPlanos() { 
+    window.location.href = "planos.html"; 
+}
+
+// Comprar planos
+function comprar(plano){
+    alert(`Plano ${plano} selecionado!`);
+}
+
+// Aplicar cupom
 function aplicarCupom(){
-    const cupom = document.getElementById("cupom").value;
+    const cupom = document.getElementById("cupom").value.trim();
     const msg = document.getElementById("msg-cupom");
     if(cupom.toLowerCase() === "gratis") msg.innerText = "+3 dias grátis aplicados!";
     else msg.innerText = "Cupom inválido";
