@@ -8,14 +8,23 @@ window.onload = () => {
 };
 
 function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const msg = document.getElementById("login-msg");
+
+    if(!username || !password){
+        msg.innerText = "Preencha usuário e senha";
+        return;
+    }
+
+    // Login fake para teste
     if(username === "Legacy.tv" && password === "123456") {
         document.getElementById("login-section").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
-        showSection('filmes');
+        showSection('filmes'); // abre a aba Filmes ao entrar
+        msg.innerText = "";
     } else {
-        document.getElementById("login-msg").innerText = "Usuário ou senha inválidos";
+        msg.innerText = "Usuário ou senha inválidos";
     }
 }
 
