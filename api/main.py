@@ -1,66 +1,53 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
-import uvicorn
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
 
-# ===========================
-# Função para ler a playlist
-# ===========================
+# Permitir que o frontend acesse a API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ou limitar ao domínio do seu front
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Carregar M3U via variável de ambiente
+M3U_FILE = os.getenv("M3U_FILE", "playlist_djy7adcm_ts (1) (1).m3u")
+
 CANAIS = []
 
-with open("playlist_djy7adcm_ts (1) (1).m3u", "r", encoding="utf-8") as f:
+with open(M3U_FILE, "r", encoding="utf-8") as f:
     lines = f.readlines()
 
 for i in range(len(lines)):
     if lines[i].startswith("#EXTINF"):
         title = lines[i].split(",")[1].strip()
         url = lines[i + 1].strip()
-        CANAIS.append({"id": len(CANAIS)+1, "title": title, "url": url})
+        # Categorizar
+        if "movie" in title.lower() or "filme" in title.lower():
+            categoria = "filmes"
+        elif "series" in title.lower() or "série" in title.lower():
+            categoria = "series"
+        else:
+            categoria = "canais"
+        CANAIS.append({"id": len(CANAIS)+1, "title": title, "url": url, "categoria": categoria})
 
 print(f"{len(CANAIS)} canais carregados!")
 
 # ===========================
-# Rota principal (interface)
+# API para playlist
 # ===========================
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    html = """
-    <html>
-        <head>
-            <title>Legacy IPTV</title>
-            <style>
-                body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; text-align:center;}
-                h1 { color: #333; }
-                .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
-                .card { background: #fff; padding: 15px; border-radius: 10px; width: 250px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);}
-                button { margin-top: 10px; padding: 10px; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer;}
-                video { width:100%; margin-top:10px; border-radius:10px; }
-            </style>
-        </head>
-        <body>
-            <h1>Legacy IPTV</h1>
-            <div class="cards-container">
-    """
-    for canal in CANAIS:
-        html += f"""
-        <div class="card">
-            <h3>{canal['title']}</h3>
-            <video controls>
-                <source src="{canal['url']}" type="application/x-mpegURL">
-            </video>
-        </div>
-        """
-
-    html += """
-            </div>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html)
+@app.get("/playlist")
+async def playlist(section: str = None):
+    if section:
+        filtered = [c for c in CANAIS if c["categoria"] == section]
+        return {"items": filtered}
+    return {"items": CANAIS}
 
 # ===========================
 # Rodar localmente
 # ===========================
 if __name__ == "__main__":
+    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
