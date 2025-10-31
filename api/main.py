@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 import os
 
 app = FastAPI()
 
-# Permitir que o frontend acesse a API
+# Permitir acesso ao frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,10 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ===========================
-# Carregar M3U via variável de ambiente ou arquivo local
-# ===========================
-M3U_FILE = os.getenv("M3U_FILE", "playlist_djy7adcm_ts (1) (1).m3u")
+# Carregar playlist
+M3U_FILE = os.getenv("M3U_FILE", "playlist_djy7adcm_ts.m3u")
 CANAIS = []
 
 with open(M3U_FILE, "r", encoding="utf-8") as f:
@@ -26,99 +24,108 @@ for i in range(len(lines)):
     if lines[i].startswith("#EXTINF"):
         title = lines[i].split(",")[1].strip()
         url = lines[i + 1].strip()
-        # Categorizar
         if "movie" in title.lower() or "filme" in title.lower():
             categoria = "filmes"
         elif "series" in title.lower() or "série" in title.lower():
             categoria = "series"
         else:
             categoria = "canais"
-        CANAIS.append({"id": len(CANAIS)+1, "title": title, "url": url, "categoria": categoria})
+        CANAIS.append({
+            "id": len(CANAIS)+1,
+            "title": title,
+            "url": url,
+            "categoria": categoria
+        })
 
 print(f"{len(CANAIS)} canais carregados!")
 
 # ===========================
-# API para playlist filtrável
-# ===========================
-@app.get("/playlist")
-async def playlist(section: str = None):
-    if section:
-        filtered = [c for c in CANAIS if c["categoria"] == section]
-        return {"items": filtered}
-    return {"items": CANAIS}
-
-# ===========================
-# Interface web
+# API web
 # ===========================
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home():
     html = """
+    <!DOCTYPE html>
     <html>
     <head>
         <title>Legacy IPTV</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <style>
-            body { font-family: Arial, sans-serif; background:#f0f2f5; margin:0; padding:0; }
-            header { background:#007bff; color:#fff; padding:15px; text-align:center; font-size:24px; }
-            nav { display:flex; justify-content:center; gap:10px; margin:15px 0; }
-            nav button { padding:10px 20px; border:none; border-radius:5px; cursor:pointer; background:#007bff; color:#fff; }
-            nav button.active { background:#0056b3; }
-            .cards-container { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; padding:0 15px; }
-            .card { background:#fff; padding:15px; border-radius:10px; width:250px; box-shadow:0 2px 6px rgba(0,0,0,0.2); cursor:pointer; text-align:center; }
-            #player-container { margin:20px auto; width:80%; max-width:800px; }
-            video { width:100%; border-radius:10px; }
+            body { font-family: 'Roboto', sans-serif; background: #f0f2f5; margin:0; padding:0;}
+            header { background:#007bff; color:#fff; padding:20px; text-align:center;}
+            .menu { display:flex; justify-content:center; gap:10px; margin:10px;}
+            .menu button { padding:10px 20px; border:none; border-radius:5px; background:#0056b3; color:#fff; cursor:pointer;}
+            .menu button.active { background:#ff5722;}
+            .cards-container { display:flex; flex-wrap:wrap; justify-content:center; gap:15px; padding:10px;}
+            .card { background:#fff; padding:10px; border-radius:10px; width:180px; text-align:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+            .card img { width:100%; border-radius:10px;}
+            #player-container { text-align:center; margin:20px;}
+            video { width:80%; max-width:800px; border-radius:10px;}
         </style>
     </head>
     <body>
-        <header>Legacy IPTV</header>
-        <nav>
+        <header>
+            <h1>Legacy IPTV</h1>
+        </header>
+        <div class="menu">
             <button onclick="showSection('canais')" id="btn-canais" class="active">Ao Vivo</button>
             <button onclick="showSection('filmes')" id="btn-filmes">Filmes</button>
             <button onclick="showSection('series')" id="btn-series">Séries</button>
-        </nav>
+        </div>
+
         <div id="player-container">
             <video id="player" controls></video>
         </div>
-        <div class="cards-container" id="items"></div>
 
+        <div class="cards-container" id="cards"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         <script>
-            let currentSection = 'canais';
+            const canais = """ + str(CANAIS) + """;
 
-            async function showSection(section) {
-                currentSection = section;
-                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            function play(url) {
+                const video = document.getElementById('player');
+                if(Hls.isSupported()) {
+                    const hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                } else if(video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = url;
+                    video.play();
+                }
+            }
+
+            function showSection(section) {
+                document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
                 document.getElementById('btn-' + section).classList.add('active');
 
-                const res = await fetch(`/playlist?section=${section}`);
-                const data = await res.json();
-                const container = document.getElementById('items');
+                const container = document.getElementById('cards');
                 container.innerHTML = '';
-                data.items.forEach(item => {
+                canais.filter(c => c.categoria === section).forEach(c => {
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerText = item.title;
-                    card.onclick = () => play(item.url);
+                    card.onclick = () => play(c.url);
+
+                    const img = document.createElement('img');
+                    // Tenta imagem correspondente, senão usa default
+                    img.src = 'static/images/canais/' + c.title + '.png';
+                    img.onerror = function(){ this.src = 'static/images/canais/default.png'; }
+                    card.appendChild(img);
+
+                    const h3 = document.createElement('h3');
+                    h3.innerText = c.title;
+                    card.appendChild(h3);
+
                     container.appendChild(card);
                 });
             }
 
-            function play(url) {
-                const player = document.getElementById('player');
-                player.src = url;
-                player.play();
-                window.scrollTo({ top:0, behavior:'smooth' });
-            }
-
-            // Carregar seção inicial
-            showSection(currentSection);
+            // Inicializar com Ao Vivo
+            showSection('canais');
         </script>
     </body>
     </html>
     """
     return HTMLResponse(content=html)
-
-# ===========================
-# Rodar localmente
-# ===========================
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
