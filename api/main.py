@@ -4,27 +4,26 @@ import os
 
 app = FastAPI()
 
-# Permitir que o frontend acesse a API
+# Permitir que o front-end acesse a API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ou limitar ao domínio do seu front
+    allow_origins=["*"],  # você pode limitar ao domínio do front-end
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Carregar M3U via variável de ambiente
+# Arquivo M3U (pode ser variável de ambiente)
 M3U_FILE = os.getenv("M3U_FILE", "playlist_djy7adcm_ts (1) (1).m3u")
 
+# Carregar canais
 CANAIS = []
-
 with open(M3U_FILE, "r", encoding="utf-8") as f:
     lines = f.readlines()
 
 for i in range(len(lines)):
     if lines[i].startswith("#EXTINF"):
         title = lines[i].split(",")[1].strip()
-        url = lines[i + 1].strip()
-        # Categorizar
+        url = lines[i+1].strip()
         if "movie" in title.lower() or "filme" in title.lower():
             categoria = "filmes"
         elif "series" in title.lower() or "série" in title.lower():
@@ -36,7 +35,7 @@ for i in range(len(lines)):
 print(f"{len(CANAIS)} canais carregados!")
 
 # ===========================
-# API para playlist
+# API JSON
 # ===========================
 @app.get("/playlist")
 async def playlist(section: str = None):
