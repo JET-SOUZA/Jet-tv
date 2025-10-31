@@ -1,62 +1,73 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f0f2f5;
+    background: linear-gradient(135deg, #6b73ff, #000dff);
     text-align: center;
-    padding: 20px;
+    padding: 0;
+    margin: 0;
+    color: #fff;
 }
 
-h1, h2 {
-    color: #333;
-}
+.hidden { display: none; }
 
-input {
-    padding: 10px;
-    margin: 5px;
-    width: 200px;
-}
-
-button {
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-nav {
-    margin-top: 20px;
-}
-
-#items {
+/* Splash Screen */
+#splash {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
+    align-items: center;
+    height: 100vh;
+    animation: fadeOut 1s ease forwards;
+    animation-delay: 2s;
+}
+.logo { width: 150px; margin-bottom: 20px; }
+.version { font-size: 1rem; color: #fff; }
+
+@keyframes fadeOut {
+    to { opacity: 0; visibility: hidden; }
 }
 
+/* Login */
+#login-section {
+    margin-top: 100px;
+}
+input {
+    padding: 12px;
+    margin: 8px;
+    width: 220px;
+    border-radius: 8px;
+    border: none;
+}
+button {
+    padding: 12px 25px;
+    margin: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #ff6b6b;
+    color: white;
+    cursor: pointer;
+}
+button:hover { background: #ff4757; }
+
+.error { color: #ff6b6b; }
+
+/* Menu */
+.menu { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+.menu button { background: linear-gradient(45deg, #1dd1a1, #10ac84); }
+
+/* Cards */
+.cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; padding: 20px; }
 .card {
     background: #fff;
-    padding: 10px;
-    border-radius: 10px;
+    color: #000;
+    padding: 12px;
+    border-radius: 12px;
     width: 180px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     cursor: pointer;
+    transition: transform 0.2s;
 }
+.card:hover { transform: scale(1.05); }
 
-#player-section {
-    margin-top: 20px;
-}
-
-video {
-    width: 80%;
-    max-width: 800px;
-    border-radius: 10px;
-    background: black;
-}
+/* Player */
+#player-section { margin-top: 20px; }
+video { width: 80%; max-width: 800px; border-radius: 10px; background: black; }
