@@ -28,4 +28,7 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/background.jpg
-
+    - assets/images/filmes/
+    - assets/images/series/
+    - assets/images/canais/
+    - assets/icons/
