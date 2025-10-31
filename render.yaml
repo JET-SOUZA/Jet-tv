@@ -1,1 +1,9 @@
-services: []
+services:
+  - type: web
+    name: legacy-iptv-api
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.main:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
