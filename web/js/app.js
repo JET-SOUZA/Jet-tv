@@ -10,12 +10,12 @@ window.onload = () => {
 function login() {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
-    if(username && password){
+    if(username === "Legacy.tv" && password === "123456") {
         document.getElementById("login-section").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
         showSection('filmes');
     } else {
-        document.getElementById("login-msg").innerText = "Preencha usuário e senha";
+        document.getElementById("login-msg").innerText = "Usuário ou senha inválidos";
     }
 }
 
@@ -32,7 +32,7 @@ async function showSection(section) {
             if(section==='filmes' && /movie|filme/i.test(title)) items.push({title,url});
             else if(section==='series' && /series|série/i.test(title)) items.push({title,url});
             else if(section==='canais' && !/movie|filme|series|série/i.test(title)) items.push({title,url});
-            else if(section==='favoritos') items.push({title,url}); // demo
+            else if(section==='favoritos') items.push({title,url});
         }
     }
 
@@ -53,17 +53,8 @@ function play(url) {
     player.play();
 }
 
-// Redirecionar para tela de planos
-function goToPlanos() {
-    window.location.href = "planos.html";
-}
-
-// Planos
-function comprar(plano){
-    alert(`Plano ${plano} selecionado!`);
-}
-
-// Cupons
+function goToPlanos() { window.location.href = "planos.html"; }
+function comprar(plano){ alert(`Plano ${plano} selecionado!`); }
 function aplicarCupom(){
     const cupom = document.getElementById("cupom").value;
     const msg = document.getElementById("msg-cupom");
