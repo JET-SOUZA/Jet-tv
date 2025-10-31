@@ -1,36 +1,45 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legacy IPTV</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Legacy IPTV</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Legacy IPTV</h1>
 
-    <div id="login-section">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Usuário">
-        <input type="password" id="password" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-        <p id="login-msg"></p>
+<!-- Splash Screen -->
+<div id="splash">
+    <img src="assets/logo.png" alt="Legacy IPTV Logo" class="logo">
+    <p class="version">Versão 1.0</p>
+</div>
+
+<!-- Login -->
+<div id="login-section" class="hidden">
+    <h2>Entrar no Legacy IPTV</h2>
+    <input type="text" id="username" placeholder="Usuário">
+    <input type="password" id="password" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <p id="login-msg" class="error"></p>
+</div>
+
+<!-- Menu e Conteúdo -->
+<div id="content" class="hidden">
+    <nav class="menu">
+        <button onclick="showSection('filmes')">🎬 Filmes</button>
+        <button onclick="showSection('series')">📺 Séries</button>
+        <button onclick="showSection('canais')">📡 Ao Vivo</button>
+        <button onclick="showSection('favoritos')">⭐ Favoritos</button>
+        <button onclick="showSection('cupons')">🎁 Cupons</button>
+    </nav>
+
+    <div id="player-section">
+        <video id="player" controls></video>
     </div>
 
-    <div id="content" style="display:none;">
-        <nav>
-            <button onclick="showSection('filmes')">Filmes</button>
-            <button onclick="showSection('series')">Séries</button>
-            <button onclick="showSection('canais')">Canais Ao Vivo</button>
-        </nav>
+    <div id="items" class="cards-container"></div>
+</div>
 
-        <div id="player-section">
-            <video id="player" controls></video>
-        </div>
-
-        <div id="items"></div>
-    </div>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
