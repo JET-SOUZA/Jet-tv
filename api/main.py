@@ -1,62 +1,66 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+import uvicorn
 
 app = FastAPI()
 
-# Permitir que o front-end acesse a API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ===========================
+# Função para ler a playlist
+# ===========================
+CANAIS = []
 
-# Usuário de login
-USERNAME = "Legacy.tv"
-PASSWORD = "Jtlm@043007"
+with open("playlist_djy7adcm_ts (1) (1).m3u", "r", encoding="utf-8") as f:
+    lines = f.readlines()
 
-# Modelos
-class LoginRequest(BaseModel):
-    username: str
-    password: str
+for i in range(len(lines)):
+    if lines[i].startswith("#EXTINF"):
+        title = lines[i].split(",")[1].strip()
+        url = lines[i + 1].strip()
+        CANAIS.append({"id": len(CANAIS)+1, "title": title, "url": url})
 
-# Dados de exemplo (você pode substituir por DB real)
-FILMES = [
-    {"id": 1, "title": "Filme 1", "url": "https://path-to-video1.m3u8"},
-    {"id": 2, "title": "Filme 2", "url": "https://path-to-video2.m3u8"}
-]
+print(f"{len(CANAIS)} canais carregados!")
 
-SERIES = [
-    {"id": 1, "title": "Série 1", "url": "https://path-to-serie1.m3u8"},
-    {"id": 2, "title": "Série 2", "url": "https://path-to-serie2.m3u8"}
-]
+# ===========================
+# Rota principal (interface)
+# ===========================
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    html = """
+    <html>
+        <head>
+            <title>Legacy IPTV</title>
+            <style>
+                body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; text-align:center;}
+                h1 { color: #333; }
+                .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+                .card { background: #fff; padding: 15px; border-radius: 10px; width: 250px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);}
+                button { margin-top: 10px; padding: 10px; border:none; background:#007bff; color:#fff; border-radius:5px; cursor:pointer;}
+                video { width:100%; margin-top:10px; border-radius:10px; }
+            </style>
+        </head>
+        <body>
+            <h1>Legacy IPTV</h1>
+            <div class="cards-container">
+    """
+    for canal in CANAIS:
+        html += f"""
+        <div class="card">
+            <h3>{canal['title']}</h3>
+            <video controls>
+                <source src="{canal['url']}" type="application/x-mpegURL">
+            </video>
+        </div>
+        """
 
-CANAIS = [
-    {"id": 1, "title": "Canal 1", "url": "https://path-to-live1.m3u8"},
-    {"id": 2, "title": "Canal 2", "url": "https://path-to-live2.m3u8"}
-]
+    html += """
+            </div>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html)
 
-# Rotas
-@app.get("/")
-def root():
-    return {"ok": True}
-
-@app.post("/login")
-def login(data: LoginRequest):
-    if data.username == USERNAME and data.password == PASSWORD:
-        return {"success": True, "message": "Login realizado com sucesso"}
-    raise HTTPException(status_code=401, detail="Usuário ou senha inválidos")
-
-@app.get("/filmes")
-def get_filmes():
-    return FILMES
-
-@app.get("/series")
-def get_series():
-    return SERIES
-
-@app.get("/canais")
-def get_canais():
-    return CANAIS
+# ===========================
+# Rodar localmente
+# ===========================
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
