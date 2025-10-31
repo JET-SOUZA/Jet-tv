@@ -1,7 +1,7 @@
 // =============================
 // CONFIGURAÇÕES GERAIS
 // =============================
-const M3U_URL = "http://americakg.xyz/get.php?username=djy7adcm&password=dbkauapt&type=m3u_plus&output=ts";
+const M3U_URL = "https://legacy-iptv-api.onrender.com/";
 
 // =============================
 // SPLASH SCREEN
