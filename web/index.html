@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy IPTV</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Legacy IPTV</h1>
+
+    <div id="login-section">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Usuário">
+        <input type="password" id="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p id="login-msg"></p>
+    </div>
+
+    <div id="content" style="display:none;">
+        <nav>
+            <button onclick="showSection('filmes')">Filmes</button>
+            <button onclick="showSection('series')">Séries</button>
+            <button onclick="showSection('canais')">Canais Ao Vivo</button>
+        </nav>
+
+        <div id="player-section">
+            <video id="player" controls></video>
+        </div>
+
+        <div id="items"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
