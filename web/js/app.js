@@ -1,50 +1,64 @@
+// =============================
+// CONFIGURAÇÕES GERAIS
+// =============================
 const M3U_URL = "http://americakg.xyz/get.php?username=djy7adcm&password=dbkauapt&type=m3u_plus&output=ts";
 
-// Splash Screen
+// =============================
+// SPLASH SCREEN
+// =============================
 window.onload = () => {
-    setTimeout(() => {
-        document.getElementById("splash").classList.add("hidden");
-        document.getElementById("login-section").classList.remove("hidden");
-    }, 2000);
+    const splash = document.getElementById("splash");
+    const loginSection = document.getElementById("login-section");
+
+    if (splash && loginSection) {
+        setTimeout(() => {
+            splash.classList.add("hidden");
+            loginSection.classList.remove("hidden");
+        }, 2000);
+    }
 };
 
-// Login funcional
+// =============================
+// LOGIN
+// =============================
 function login() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
     const msg = document.getElementById("login-msg");
 
-    if(!username || !password){
+    if (!username || !password) {
         msg.innerText = "Preencha usuário e senha";
         return;
     }
 
-    // Login fake para teste
-    if(username === "Legacy.tv" && password === "123456") {
+    if (username === "Legacy.tv" && password === "Jtlm@043007") {
         document.getElementById("login-section").classList.add("hidden");
         document.getElementById("content").classList.remove("hidden");
-        showSection('filmes'); // abre a aba Filmes ao entrar
         msg.innerText = "";
+        showSection('filmes');
     } else {
         msg.innerText = "Usuário ou senha inválidos";
     }
 }
 
-// Mostrar seção e listar itens da playlist M3U
+// =============================
+// LISTAR ITENS DA PLAYLIST
+// =============================
 async function showSection(section) {
     const res = await fetch(M3U_URL);
     const text = await res.text();
     const lines = text.split("\n").filter(l => l.trim() !== "");
     const items = [];
 
-    for(let i=0; i<lines.length; i++){
-        if(lines[i].startsWith("#EXTINF:")) {
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith("#EXTINF:")) {
             const title = lines[i].split(",")[1] || "Sem título";
-            const url = lines[i+1] || "";
-            if(section==='filmes' && /movie|filme/i.test(title)) items.push({title,url});
-            else if(section==='series' && /series|série/i.test(title)) items.push({title,url});
-            else if(section==='canais' && !/movie|filme|series|série/i.test(title)) items.push({title,url});
-            else if(section==='favoritos') items.push({title,url});
+            const url = lines[i + 1] || "";
+
+            if (section === 'filmes' && /movie|filme/i.test(title)) items.push({ title, url });
+            else if (section === 'series' && /series|série/i.test(title)) items.push({ title, url });
+            else if (section === 'canais' && !/movie|filme|series|série/i.test(title)) items.push({ title, url });
+            else if (section === 'favoritos') items.push({ title, url });
         }
     }
 
@@ -59,27 +73,34 @@ async function showSection(section) {
     });
 }
 
-// Player embutido
+// =============================
+// PLAYER
+// =============================
 function play(url) {
     const player = document.getElementById("player");
-    player.src = url;
-    player.play();
+    const playerSection = document.getElementById("player-section");
+
+    if (player && playerSection) {
+        player.src = url;
+        player.play();
+        playerSection.scrollIntoView({ behavior: "smooth" });
+    }
 }
 
-// Redirecionar para tela de planos
-function goToPlanos() { 
-    window.location.href = "planos.html"; 
+// =============================
+// PLANOS & CUPONS
+// =============================
+function goToPlanos() {
+    window.location.href = "planos.html";
 }
 
-// Comprar planos
-function comprar(plano){
+function comprar(plano) {
     alert(`Plano ${plano} selecionado!`);
 }
 
-// Aplicar cupom
-function aplicarCupom(){
+function aplicarCupom() {
     const cupom = document.getElementById("cupom").value.trim();
     const msg = document.getElementById("msg-cupom");
-    if(cupom.toLowerCase() === "gratis") msg.innerText = "+3 dias grátis aplicados!";
+    if (cupom.toLowerCase() === "gratis") msg.innerText = "+3 dias grátis aplicados!";
     else msg.innerText = "Cupom inválido";
 }
