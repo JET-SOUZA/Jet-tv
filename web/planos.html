@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planos Legacy IPTV</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h2>Planos de Recarga</h2>
+<div class="cards-container">
+    <div class="card plano">
+        <h3>Básico</h3>
+        <p>R$ 9,90 / 1 mês</p>
+        <p>+1 dia grátis</p>
+        <button onclick="comprar('Básico')">Comprar</button>
+    </div>
+    <div class="card plano hot">
+        <h3>Plus+</h3>
+        <p>R$ 25,90 / 3 meses</p>
+        <p>+4 dias grátis</p>
+        <button onclick="comprar('Plus+')">Comprar</button>
+    </div>
+    <div class="card plano">
+        <h3>Família</h3>
+        <p>R$ 89,90 / 1 ano</p>
+        <p>+15 dias grátis</p>
+        <button onclick="comprar('Família')">Comprar</button>
+    </div>
+</div>
+
+<div class="cupom-section">
+    <input type="text" id="cupom" placeholder="Digite seu cupom">
+    <button onclick="aplicarCupom()">Aplicar</button>
+    <p id="msg-cupom"></p>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
