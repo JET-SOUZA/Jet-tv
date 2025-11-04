@@ -1,9 +1,6 @@
 services:
   - type: web
-    name: legacy-iptv-api
+    name: jet-tv
     env: python
-    buildCommand: ""
-    startCommand: gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.main:app
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn api.main:app -k uvicorn.workers.UvicornWorker
