@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: jet-tv
+    name: legacy-tv
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn api.main:app -k uvicorn.workers.UvicornWorker
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn api.main:app --host 0.0.0.0 --port 10000"
