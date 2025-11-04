@@ -11,7 +11,7 @@ app = FastAPI()
 # ===========================
 # CONFIGURAÇÕES
 # ===========================
-M3U_FILE = os.getenv("M3U_FILE", "playlist_djy7adcm_ts.m3u")
+M3U_FILE = os.getenv("M3U_FILE", os.path.join(os.path.dirname(__file__), "playlist_djy7adcm_ts.m3u"))
 
 # Logger do servidor
 logger = logging.getLogger("uvicorn.error")
@@ -30,7 +30,6 @@ app.add_middleware(
 def carregar_playlist(caminho: str):
     canais = []
 
-    # 1️⃣ Caso seja URL (http ou https)
     if caminho.startswith(("http://", "https://")):
         try:
             logger.info(f"Baixando playlist de {caminho} ...")
@@ -40,8 +39,6 @@ def carregar_playlist(caminho: str):
         except Exception as e:
             logger.warning(f"❌ Falha ao baixar playlist: {e}")
             return canais
-
-    # 2️⃣ Caso seja arquivo local
     else:
         p = Path(caminho)
         if not p.exists():
@@ -53,20 +50,17 @@ def carregar_playlist(caminho: str):
             logger.warning(f"❌ Erro ao ler playlist: {e}")
             return canais
 
-    # 3️⃣ Processar linhas da M3U
     for i in range(len(lines)):
         if lines[i].startswith("#EXTINF"):
             try:
                 title = lines[i].split(",")[1].strip()
                 url = lines[i + 1].strip()
-
                 if "movie" in title.lower() or "filme" in title.lower():
                     categoria = "filmes"
                 elif "series" in title.lower() or "série" in title.lower():
                     categoria = "series"
                 else:
                     categoria = "canais"
-
                 canais.append({
                     "id": len(canais) + 1,
                     "title": title,
@@ -74,8 +68,7 @@ def carregar_playlist(caminho: str):
                     "categoria": categoria
                 })
             except IndexError:
-                continue  # Linha incompleta, ignora
-
+                continue
     logger.info(f"✅ {len(canais)} canais carregados com sucesso!")
     return canais
 
@@ -86,42 +79,103 @@ def carregar_playlist(caminho: str):
 CANAIS = carregar_playlist(M3U_FILE)
 
 # ===========================
-# Página Web IPTV
+# Página Web estilo UniTVnet
 # ===========================
 @app.get("/", response_class=HTMLResponse)
 async def home():
     html = f"""
     <!DOCTYPE html>
-    <html>
+    <html lang="pt-BR">
     <head>
-        <title>Legacy IPTV</title>
+        <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+        <title>Legacy IPTV</title>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
         <style>
-            body {{ font-family: 'Roboto', sans-serif; background: #f0f2f5; margin:0; padding:0; }}
-            header {{ background:#007bff; color:#fff; padding:20px; text-align:center; }}
-            .menu {{ display:flex; justify-content:center; gap:10px; margin:10px; flex-wrap:wrap; }}
-            .menu button {{ padding:10px 20px; border:none; border-radius:5px; background:#0056b3; color:#fff; cursor:pointer; transition:0.3s; }}
-            .menu button.active {{ background:#ff5722; }}
-            .menu button:hover {{ opacity:0.9; }}
-            .cards-container {{ display:flex; flex-wrap:wrap; justify-content:center; gap:15px; padding:10px; }}
-            .card {{ background:#fff; padding:10px; border-radius:10px; width:180px; text-align:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.2); transition:transform 0.2s; }}
-            .card:hover {{ transform:scale(1.05); }}
-            .card img {{ width:100%; border-radius:10px; }}
-            #player-container {{ text-align:center; margin:20px; }}
-            video {{ width:90%; max-width:800px; border-radius:10px; background:#000; }}
+            body {{
+                margin: 0;
+                font-family: 'Roboto', sans-serif;
+                background-color: #0b0c10;
+                color: white;
+                overflow-x: hidden;
+            }}
+            header {{
+                background: linear-gradient(90deg, #007bff, #00b4d8);
+                padding: 20px;
+                text-align: center;
+                font-size: 28px;
+                font-weight: 700;
+                letter-spacing: 1px;
+            }}
+            nav {{
+                display: flex;
+                justify-content: center;
+                background-color: #1f2833;
+                padding: 10px;
+                flex-wrap: wrap;
+            }}
+            nav button {{
+                margin: 5px;
+                padding: 10px 20px;
+                border: none;
+                background-color: #0d6efd;
+                color: white;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 0.2s;
+            }}
+            nav button.active, nav button:hover {{
+                background-color: #ff5722;
+            }}
+            .cards-container {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 15px;
+                padding: 20px;
+            }}
+            .card {{
+                background-color: #1f2833;
+                border-radius: 12px;
+                padding: 10px;
+                cursor: pointer;
+                text-align: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                transition: transform 0.2s;
+            }}
+            .card:hover {{
+                transform: scale(1.05);
+            }}
+            .card img {{
+                width: 100%;
+                border-radius: 10px;
+                height: 120px;
+                object-fit: cover;
+            }}
+            .card h3 {{
+                font-size: 15px;
+                margin: 10px 0 0;
+                color: #ddd;
+            }}
+            #player-container {{
+                text-align: center;
+                margin-top: 15px;
+            }}
+            video {{
+                width: 90%;
+                max-width: 1000px;
+                border-radius: 10px;
+                background: #000;
+            }}
         </style>
     </head>
     <body>
-        <header>
-            <h1>Legacy IPTV</h1>
-        </header>
-
-        <div class="menu">
+        <header>📺 Legacy IPTV</header>
+        <nav>
             <button onclick="showSection('canais')" id="btn-canais" class="active">Ao Vivo</button>
             <button onclick="showSection('filmes')" id="btn-filmes">Filmes</button>
             <button onclick="showSection('series')" id="btn-series">Séries</button>
-        </div>
+        </nav>
 
         <div id="player-container">
             <video id="player" controls></video>
@@ -144,10 +198,11 @@ async def home():
                     video.src = url;
                     video.play();
                 }}
+                window.scrollTo({{ top: 0, behavior: 'smooth' }});
             }}
 
             function showSection(section) {{
-                document.querySelectorAll('.menu button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
                 document.getElementById('btn-' + section).classList.add('active');
 
                 const container = document.getElementById('cards');
@@ -158,8 +213,7 @@ async def home():
                     card.onclick = () => play(c.url);
 
                     const img = document.createElement('img');
-                    img.src = 'static/images/canais/' + c.title + '.png';
-                    img.onerror = function(){{ this.src = 'static/images/canais/default.png'; }}
+                    img.src = 'https://picsum.photos/200/120?random=' + c.id;
                     card.appendChild(img);
 
                     const h3 = document.createElement('h3');
